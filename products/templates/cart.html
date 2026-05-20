@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1 class="my-4">Your Shopping Cart</h1>
+    {% if cart_items %}
+        <div class="card p-3">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th style="width: 180px;">Quantity</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{{ item.product.image_url }}{% endif %}" alt="{{ item.product.name }}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 15px;">
+                                <b>{{ item.product.name }}</b>
+                            </div>
+                        </td>
+                        <td>
+                            {% if item.product.offers.all %}
+                                <span class="text-decoration-line-through text-muted small">&#8377;{{ item.product.price }}</span>
+                                <b class="text-success ms-2">&#8377;{{ item.product.discounted_price }}</b>
+                            {% else %}
+                                &#8377;{{ item.product.price }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="/products/update-cart/{{ item.product.id }}/" method="POST" class="d-flex align-items-center m-0">
+                                {% csrf_token %}
+                                <button type="submit" name="action" value="decrement" class="btn btn-sm btn-outline-secondary px-2">-</button>
+                                <span class="mx-3 font-weight-bold">{{ item.quantity }}</span>
+                                <button type="submit" name="action" value="increment" class="btn btn-sm btn-outline-secondary px-2">+</button>
+                            </form>
+                        </td>
+                        <td>&#8377;{{ item.total_price }}</td>
+                        <td>
+                            <form action="/products/remove-from-cart/{{ item.product.id }}/" method="POST" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded">
+                <h4>Grand Total:</h4>
+                <h3 class="text-success"><b>&#8377;{{ grand_total }}</b></h3>
+            </div>
+            <div class="text-end mt-3">
+                <a href="{% url 'index' %}" class="btn btn-secondary">Continue Shopping</a>
+                <button class="btn btn-success px-4">Proceed to Checkout</button>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <h3>Your cart is empty! 🛒</h3>
+            <p class="text-muted">Go back to the homepage to add products.</p>
+            <a href="{% url 'index' %}" class="btn btn-primary mt-3">Shop Now</a>
+        </div>
+    {% endif %}
+{% endblock %}
