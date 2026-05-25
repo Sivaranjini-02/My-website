@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-5 text-center" style="max-width: 650px;">
+    <div class="card p-5 shadow border-0 bg-white rounded-3">
+        
+        <div class="mb-4">
+            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 90px; height: 90px;">
+                <span class="display-4 fw-bold">✓</span>
+            </div>
+        </div>
+        
+        <h2 class="fw-bold text-dark mb-2">Order Confirmed! 🎉</h2>
+        <p class="text-muted mb-4 fs-5">
+            Thank you for your purchase, <strong class="text-dark">@{{ user.username }}</strong>! Your invoice has been successfully processed and saved inside our database.
+        </p>
+
+        <div class="bg-light rounded-3 p-3 mb-4 text-start border">
+            <div class="d-flex justify-content-between mb-2 small border-bottom pb-2">
+                <span class="text-secondary">Order Reference ID:</span>
+                <span class="fw-bold text-dark">#{{ order.id }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2 small border-bottom pb-2">
+                <span class="text-secondary">Shipping Destination:</span>
+                <span class="fw-bold text-dark text-truncate" style="max-width: 250px;">{{ order.shipping_address }}</span>
+            </div>
+            <div class="d-flex justify-content-between fs-5 fw-bold text-dark pt-1">
+                <span>Total Amount Paid:</span>
+                <span class="text-success">${{ order.total_amount }}</span>
+            </div>
+        </div>
+
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+            <a href="{% url 'order_tracking' %}" class="btn btn-success btn-lg fw-bold px-4 shadow-sm">
+                Track Order Status Live 🚚
+            </a>
+            <a href="{% url 'index' %}" class="btn btn-outline-dark btn-lg px-4">
+                Continue Shopping
+            </a>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-5" style="max-width: 800px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0">📦 Your Order History & Status</h2>
+        <a href="{% url 'index' %}" class="btn btn-outline-dark btn-sm">← Back to Shop</a>
+    </div>
+
+    {% if orders %}
+        {% for order in orders %}
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                    <div>
+                        <span class="fw-bold text-warning me-2">Order #{{ order.id }}</span>
+                        <span class="text-light small">{{ order.created_at|date:"M d, Y - H:i" }}</span>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary px-3 py-2 fs-6">{{ order.status }}</span>
+                    </div>
+                </div>
+                <div class="card-body p-4 bg-white">
+                    <p class="text-muted small"><strong>Shipping To:</strong> {{ order.shipping_address }}</p>
+                    
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for item in order.items.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                                <div>
+                                    <h6 class="my-0 fw-bold">{{ item.product.name|default:"Product Discontinued" }}</h6>
+                                    <small class="text-muted">Quantity: {{ item.quantity }}</small>
+                                </div>
+                                <span class="text-dark fw-bold">${{ item.price }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <span class="fw-bold text-secondary">Total Amount Paid:</span>
+                        <span class="fs-4 fw-bold text-success">${{ order.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-secondary text-center py-5 border-0 rounded-3">
+            <h5 class="mb-1 text-dark fw-bold">No orders placed yet! 🛒</h5>
+            <p class="text-muted small mb-0">Add items to your cart and complete checkout to see your history tracking here.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

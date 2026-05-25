@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import Product,Offer
+from django.contrib.auth.forms import UserCreationForm
 
 def index(request):
     products = Product.objects.all()
@@ -71,3 +72,79 @@ def home(request):
         'cart_count': cart_count
     }
     return render(request, 'home.html', context)
+
+
+
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
+
+
+from django.contrib.auth.decorators import login_required
+from .models import Order, OrderItem
+
+
+
+@login_required
+def checkout(request):
+    cart = request.session.get('cart', {})
+    if not cart:
+        return redirect('index')
+
+    cart_items = []
+    grand_total = 0
+    for product_id_str, quantity in cart.items():
+        product = get_object_or_404(Product, id=int(product_id_str))
+        total_price = product.discounted_price * quantity
+        grand_total += total_price
+        cart_items.append({'product': product, 'quantity': quantity, 'total_price': total_price})
+
+    if request.method == "POST":
+        address = request.POST.get('shipping_address')
+        if address:
+
+            order = Order.objects.create(user=request.user, shipping_address=address, total_amount=grand_total)
+
+
+            for item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=item['product'],
+                    price=item['product'].discounted_price,
+                    quantity=item['quantity']
+                )
+
+                item['product'].stock -= item['quantity']
+                item['product'].save()
+
+
+            request.session['cart'] = {}
+            return render(request, 'checkout_success.html', {'order': order})
+
+    return render(request, 'checkout.html', {'cart_items': cart_items, 'grand_total': grand_total})
+
+
+
+def api_product_list(request):
+    products = Product.objects.all()
+    data = []
+    for p in products:
+        data.append({
+            'id': p.id,
+            'name': p.name,
+            'price': float(p.price),
+            'stock': p.stock
+        })
+    return JsonResponse({'products': data})
+
+@login_required
+def order_tracking(request):
+
+    user_orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'order_tracking.html', {'orders': user_orders})
